@@ -1,0 +1,69 @@
+{
+  "projectName": "caveman-ptbr",
+  "lastUpdated": "2026-04-14T00:00:00.000Z",
+  "protectedAreas": [
+    {
+      "path": "skills/caveman/SKILL.md",
+      "reason": "Single source of truth do comportamento caveman no fork. CI sincroniza para destinos (Cursor, Windsurf, Cline, Copilot, plugins). Apos ADR-007, este arquivo define o output PT-BR de caverna como canonico do fork.",
+      "protectedSince": "ADR-002",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Edicoes devem preservar estrutura (lite/full/ultra, auto-clarity rule, exemplos before/after). Adicionar modos novos ou reintroduzir wenyan requer ADR novo. Regras de compressao PT-BR sao o output canonico — mudar sem ADR descaracteriza produto."
+    },
+    {
+      "path": "caveman-compress/scripts/validate.py",
+      "reason": "Algoritmos de validacao (headings, code blocks, URLs, paths) sao idioma-agnosticos. Adicionar logica de idioma introduz bugs e regressoes sem ganho.",
+      "protectedSince": "ADR-002",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Se validacao falhar em conteudo PT-BR, investigar antes de modificar. Provavelmente problema de prompt, nao de validator."
+    },
+    {
+      "path": "caveman-compress/scripts/detect.py",
+      "reason": "Deteccao de natural-language vs code/config e idioma-agnostica por design (heuristicas estruturais). Modificar sem necessidade introduz risco.",
+      "protectedSince": "ADR-002",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Confirmar com fixtures PT-BR antes de supor que precisa mudar."
+    },
+    {
+      "path": "hooks/caveman-activate.js:silent-fail-behavior",
+      "reason": "Todos os try/catch e checagens de filesystem que garantem silent-fail do SessionStart hook. Quebrar isso bloqueia Claude Code ao abrir sessao. i18n nao pode introduzir nova superficie de falha.",
+      "protectedSince": "ADR-004",
+      "allowedChanges": "with-migration-plan",
+      "notes": "Qualquer carregamento de locale deve ser envolto em try/catch com fallback para string hardcoded PT-BR. Plano de migracao deve incluir teste de 'arquivo de locale ausente' e 'JSON corrompido'."
+    },
+    {
+      "path": "~/.claude/.caveman-active",
+      "reason": "Flag file e contrato entre hooks. Formato (string de uma palavra) nao pode mudar sem coordenacao entre os 3 hooks.",
+      "protectedSince": "ADR-005",
+      "allowedChanges": "with-migration-plan",
+      "notes": "Apos ADR-007, schema valido reduziu para: full, lite, ultra, commit, review, compress. Valores wenyan-* e caveman-ptbr* foram removidos. Qualquer mudanca futura exige atualizar: caveman-mode-tracker.js, caveman-statusline.sh, caveman-statusline.ps1, SKILL.md."
+    },
+    {
+      "path": ".github/workflows/sync-skill.yml",
+      "reason": "Mecanismo de SSOT -> multiplos destinos. Mudar sem entender quebra distribuicao para Cursor/Windsurf/Cline/Copilot.",
+      "protectedSince": "ADR-006",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Apos ADR-007 o CI deve remover qualquer step que copiasse arquivos wenyan. Se havia steps de sync PT-BR paralelo, podem ser consolidados (o SSOT unico agora gera output PT-BR default)."
+    },
+    {
+      "path": "evals/prompts/en.txt",
+      "reason": "Prompts originais de eval em EN. Manter como fixture historica/regressao.",
+      "protectedSince": "ADR-002",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Apos ADR-007, evals/prompts/pt-br.txt e o benchmark canonico. en.txt pode ser preservado para regressao estrutural mas ja nao e referencia de numeros do produto."
+    },
+    {
+      "path": "benchmarks/prompts.json",
+      "reason": "Benchmark fixture. Apos ADR-007, benchmarks PT-BR sao os canonicos do produto.",
+      "protectedSince": "ADR-002",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Manter ou renomear conforme estrategia de benchmark pos-ADR-007. benchmarks/prompts.pt-br.json passa a ser fonte dos numeros do README."
+    },
+    {
+      "path": "tests/caveman-compress/*.original.md",
+      "reason": "Fixtures de teste para compressor. Apos ADR-007 pares golden canonicos sao PT-BR.",
+      "protectedSince": "ADR-002",
+      "allowedChanges": "with-architect-approval",
+      "notes": "Fixtures EN existentes podem ser preservadas para regressao estrutural ou removidas se nao agregarem. Pares canonicos vivem em tests/caveman-compress/pt-br/."
+    }
+  ]
+}

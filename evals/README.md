@@ -1,5 +1,7 @@
 # Evals
 
+🇧🇷 [Versão em português](README.pt-br.md) • 📖 [README principal](../README.md)
+
 Measures real token compression of caveman skills by running the same
 prompts through Claude Code under three conditions and comparing the
 generated output token counts.

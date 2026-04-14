@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caveman | Compressão Litíca de Tokens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --bg-elevated: #080808;
+  --border: #1A1A1A;
+  --border-hover: #333333;
+  --text-primary: #FFFFFF;
+  --text-secondary: #888888;
+  --text-tertiary: #444444;
+  --accent: #FF3300;
+  --accent-glow: rgba(255, 51, 0, 0.15);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--bg); color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden; -webkit-font-smoothing: antialiased; letter-spacing: -0.02em;
+}
+::selection { background: var(--text-primary); color: var(--bg); }
+.bg-grid {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+.ambient-aura {
+  position: fixed; width: 80vw; height: 80vh; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 51, 0, 0.05) 0%, transparent 60%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: -3; filter: blur(80px);
+  animation: breatheAura 15s ease-in-out infinite alternate;
+}
+@keyframes breatheAura {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+  100% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
+}
+.container { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 8rem 0; position: relative; }
+.section-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase;
+  color: var(--accent); letter-spacing: 0.1em; margin-bottom: 1.5rem; display: block;
+}
+.section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 500; letter-spacing: -0.04em; margin-bottom: 1.5rem; line-height: 1.1; }
+.section-desc { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; line-height: 1.6; font-weight: 300; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 4rem; }
+.hero h1 {
+  font-size: clamp(4rem, 10vw, 8rem); font-weight: 400; letter-spacing: -0.06em;
+  line-height: 0.9; margin-bottom: 2rem; text-transform: lowercase;
+}
+.hero-subtitle { font-size: clamp(1.2rem, 3vw, 1.5rem); color: var(--text-secondary); max-width: 700px; font-weight: 300; line-height: 1.5; }
+.cli-install {
+  margin-top: 4rem; display: inline-flex; align-items: center; background: rgba(10,10,10,0.6);
+  border: 1px solid var(--border); border-radius: 8px; padding: 4px 4px 4px 20px;
+  backdrop-filter: blur(10px); transition: border-color 0.3s;
+}
+.cli-code { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--text-primary); padding-right: 24px; }
+.cli-btn {
+  background: var(--text-primary); color: var(--bg); border: none;
+  padding: 10px 20px; border-radius: 4px; font-weight: 500; font-size: 0.85rem;
+  cursor: pointer; transition: transform 0.2s;
+}
+.cli-btn:active { transform: scale(0.96); }
+.footer { border-top: 1px solid var(--border); padding: 4rem 24px; font-size: 0.85rem; color: var(--text-tertiary); text-align: center; max-width: 1040px; margin: 0 auto; }
+.footer a { color: var(--text-secondary); text-decoration: none; }
+.footer a:hover { color: var(--text-primary); }
+.reveal { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="ambient-aura"></div>
+
+<section class="hero container">
+  <div class="reveal">
+    <h1>Palavra<br>pequena.</h1>
+    <p class="hero-subtitle">Cérebro ainda grande. Técnica intacta. Caveman faz Claude responder em português de caverna por padrão — economiza ~65% tokens output mantendo 100% precisão técnica.</p>
+
+    <div class="cli-install">
+      <span class="cli-code">Instalar: npx skills add JuliusBrussee/caveman</span>
+      <button class="cli-btn" onclick="copyInstall(this)">Copiar</button>
+    </div>
+  </div>
+</section>
+
+<section class="section container reveal">
+  <span class="section-badge">Compressão</span>
+  <h2 class="section-title">Economia Real de Tokens</h2>
+  <p class="section-desc">Mesma solução técnica. 75% menos palavra. Benchmarks reais do Claude API.</p>
+
+  <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border); border-radius: 8px; background: rgba(10,10,10,0.3);">
+    <p style="margin-bottom: 1rem;"><strong>React Re-render (69 → 19 tokens):</strong></p>
+    <p style="color: var(--text-secondary); line-height: 1.6;">
+      Antes: "O componente React está re-renderizando porque você está criando uma nova referência de objeto a cada renderização. Quando você passa um objeto inline como prop, a comparação superficial vê como diferente sempre, que dispara re-render."
+    </p>
+    <p style="color: var(--accent); line-height: 1.6; margin-top: 1rem;">
+      Caveman: "Nova ref objeto cada render. Prop inline = nova ref = re-render. Usar useMemo."
+    </p>
+  </div>
+</section>
+
+<section class="section container reveal">
+  <span class="section-badge">Modos</span>
+  <h2 class="section-title">Escolha seu Nível</h2>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+    <div style="padding: 2rem; border: 1px solid var(--border); border-radius: 8px; background: rgba(10,10,10,0.3);">
+      <h3 style="margin-bottom: 1rem;">Lite</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;">Profissional. Sem fluff. Grammar mantido.</p>
+    </div>
+    <div style="padding: 2rem; border: 1px solid var(--border); border-radius: 8px; background: rgba(10,10,10,0.3);">
+      <h3 style="margin-bottom: 1rem;">Full (Padrão)</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;">Caveman clássico. Fragmentos OK. Sem artigos.</p>
+    </div>
+    <div style="padding: 2rem; border: 1px solid var(--border); border-radius: 8px; background: rgba(10,10,10,0.3);">
+      <h3 style="margin-bottom: 1rem;">Ultra</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem;">Máximo. Telegráfico. Uma palavra.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section container reveal">
+  <span class="section-badge">Skills</span>
+  <h2 class="section-title">Ferramentas</h2>
+
+  <ul style="margin-top: 2rem; color: var(--text-secondary); line-height: 2;">
+    <li><strong>caveman-commit</strong> — Commits terse. Conventional. ≤50 chars.</li>
+    <li><strong>caveman-review</strong> — Code review uma linha. Sem enrolação.</li>
+    <li><strong>caveman-compress</strong> — Comprime memory files. ~46% economizado.</li>
+    <li><strong>caveman-help</strong> — Quick reference. Todos modos + commands.</li>
+  </ul>
+</section>
+
+<section class="section container reveal">
+  <span class="section-badge">Primeiros Passos</span>
+  <h2 class="section-title">Install + Uso</h2>
+
+  <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border); border-radius: 8px; background: rgba(10,10,10,0.3); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--text-secondary);">
+    <div style="margin-bottom: 1rem;">
+      <span style="color: var(--accent);">$</span> npx skills add JuliusBrussee/caveman
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <span style="color: var(--accent);">$</span> /caveman
+    </div>
+    <div style="color: var(--accent);">
+      Me ready.
+    </div>
+  </div>
+
+  <p style="margin-top: 2rem; color: var(--text-secondary);">
+    Ver <a href="../README.md" style="color: var(--accent); text-decoration: none;">README.md</a> para docs completas.
+    <a href="https://github.com/JuliusBrussee/caveman" target="_blank" style="color: var(--accent); text-decoration: none;">Repo</a> original em inglês.
+  </p>
+</section>
+
+<footer class="footer">
+  <div>Fork PT-BR. Versão original: <a href="https://github.com/JuliusBrussee/caveman" target="_blank">github.com/JuliusBrussee/caveman</a></div>
+  <div style="margin-top: 1rem;">MIT License. Cérebro ainda grande. Palavra pequena.</div>
+  <div style="margin-top: 2rem;"><a href="index.html">English version</a></div>
+</footer>
+
+<script>
+function copyInstall(btn) {
+  navigator.clipboard.writeText('npx skills add JuliusBrussee/caveman');
+  btn.textContent = 'Copiado';
+  setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

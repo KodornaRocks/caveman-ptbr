@@ -1,0 +1,98 @@
+{
+  "projectName": "caveman-ptbr",
+  "lastUpdated": "2026-04-14T00:00:00.000Z",
+  "principles": [
+    {
+      "id": "P-001",
+      "name": "Zero-Dependency i18n",
+      "description": "i18n deve ser implementada usando apenas stdlib (Node.js fs/path/os e Python stdlib). Nenhuma lib de internacionalizacao (i18next, gettext, babel, intl, etc.) pode ser introduzida.",
+      "rationale": "O projeto upstream tem zero deps de runtime para hooks JS e se orgulha disso. Introduzir dep de i18n quebraria uma caracteristica arquitetural central e dificultaria merges com upstream.",
+      "examples": [
+        "locales/en.json e locales/pt-br.json lidos via JSON.parse nativo",
+        "Python cli usa json.load stdlib"
+      ],
+      "relatedDecisions": ["ADR-001", "ADR-004"]
+    },
+    {
+      "id": "P-002",
+      "name": "Preserve Upstream Structure (not output)",
+      "description": "Preservamos ESTRUTURA e COMPORTAMENTO OPERACIONAL do caveman upstream: formato do flag file, silent-fail de hooks, algoritmos de validate/detect, CI sync para 9 destinos, tres niveis de intensidade (lite/full/ultra), skills independentes (commit/review/compress), auto-clarity rule. NAO preservamos o OUTPUT caveman-speak em EN — o output default do fork e portugues de caverna.",
+      "rationale": "O fork e PT-BR-first nativo (P-008). Preservar output EN era valido quando EN era o default; apos ADR-007, PT-BR virou default e preservar EN perdeu sentido. Mas a arquitetura operacional do upstream (hooks, skills, CI) e solida e continua valendo — mudar apenas por mudar quebra sem ganho.",
+      "examples": [
+        "Formato do flag file preservado (uma palavra por linha)",
+        "Silent-fail de hooks preservado",
+        "Tres niveis lite/full/ultra preservados",
+        "Output EN: NAO preservado — substituido por portugues de caverna"
+      ],
+      "relatedDecisions": ["ADR-002", "ADR-007"]
+    },
+    {
+      "id": "P-003",
+      "name": "PT-BR First, EN Always Available",
+      "description": "PT-BR e o locale default do fork. EN permanece funcional como locale secundario com paridade minima garantida por contrato. Nenhuma mensagem deve ficar sem traducao em EN se estiver na lista required_keys.",
+      "rationale": "Fork serve primariamente comunidade BR. Manter EN vivo preserva rebase com upstream, utilidade para usuarios EN e honestidade de benchmarks comparaveis.",
+      "examples": [
+        "CAVEMAN_LANG nao setada = pt-br",
+        "CAVEMAN_LANG=en ativa locale EN sem degradacao funcional"
+      ],
+      "relatedDecisions": ["ADR-001", "ADR-003"]
+    },
+    {
+      "id": "P-004",
+      "name": "Silent-Fail on Locale Errors",
+      "description": "Falha ao carregar arquivo de locale, chave ausente ou JSON invalido nunca pode bloquear execucao do hook ou CLI. Em caso de erro, usar fallback na ordem: locale requisitado -> pt-br -> string literal em codigo.",
+      "rationale": "Hooks Claude Code devem silent-fail conforme doutrina upstream. Quebrar SessionStart por falta de uma chave de traducao seria regressao inaceitavel.",
+      "examples": [
+        "try/catch em torno de JSON.parse em caveman-activate.js",
+        "funcao t(key, lang) com fallback em cascata"
+      ],
+      "relatedDecisions": ["ADR-004"]
+    },
+    {
+      "id": "P-005",
+      "name": "Single Source of Truth Per Locale",
+      "description": "Para cada peca de conteudo traduzivel, ha exatamente UM arquivo canonico por locale. Copias sincronizadas pelo CI nao sao editaveis. A relacao entre locales (pt-br canonico -> en simplificado) e explicita na estrutura de diretorios.",
+      "rationale": "Caveman upstream ja adota SSOT rigido (skills/caveman/SKILL.md -> 9 destinos). Multiplos locales multiplicam a chance de divergencia; regra SSOT deve escalar para cobrir locales tambem.",
+      "examples": [
+        "skills/caveman/SKILL.md e canonico do comportamento (output PT-BR apos ADR-007)",
+        "locales/pt-br.json e locales/en.json sao canonicos para strings de hook/CLI"
+      ],
+      "relatedDecisions": ["ADR-001", "ADR-006"]
+    },
+    {
+      "id": "P-006",
+      "name": "Stack Agnostic Locale Contract",
+      "description": "O contrato de chaves de traducao (required_keys, placeholders, nomenclatura) e identico entre JS hooks e Python CLI. Mudar o contrato exige atualizar ambos simultaneamente.",
+      "rationale": "Reduz carga cognitiva, facilita auditoria de paridade e evita drift entre runtimes.",
+      "examples": [
+        "Chave hooks.activate.banner existe em pt-br.json e en.json com mesmos placeholders {mode}",
+        "Chave cli.compress.starting existe em ambos locales com mesma semantica"
+      ],
+      "relatedDecisions": ["ADR-003", "ADR-004"]
+    },
+    {
+      "id": "P-007",
+      "name": "Caveman Voice Preserved Per Locale",
+      "description": "A voz caveman (no upstream: broken EN — 'Brain still big.', 'One rock. That it.') tem equivalente PT-BR igualmente deliberado. No fork, a voz canonica do produto e a PT-BR. Nao normalizar para portugues formal em README/docs/output onde a voz e brand.",
+      "rationale": "README e product artifact com voz intencional. Traducao literal formal mataria o brand. Apos ADR-007, voz PT-BR e a voz PRIMARIA do fork.",
+      "examples": [
+        "'Brain still big.' -> 'Cerebro ainda grande.' (canonica do fork)",
+        "'One rock. That it.' -> 'Uma pedra. So isso.' (canonica do fork)"
+      ],
+      "relatedDecisions": ["ADR-002", "ADR-007"]
+    },
+    {
+      "id": "P-008",
+      "name": "PT-BR is Default Output Across All Modes",
+      "description": "Output do agente nos modos `full`, `lite` e `ultra` e em **portugues de caverna** como default. Nao ha modo EN-first, nao ha sufixo ptbr-*, nao ha wenyan. Os tres niveis de intensidade governam apenas agressividade de compressao, nunca idioma.",
+      "rationale": "Fork e PT-BR-first nativo. Qualquer dualidade (ptbr-* como modo separado) cria ruido e contradiz a identidade do produto. Simplicity first: um idioma de output, tres intensidades, tres skills independentes.",
+      "examples": [
+        "/caveman -> output PT-BR de caverna (full)",
+        "/caveman lite -> output PT-BR de caverna (lite)",
+        "/caveman ultra -> output PT-BR de caverna (ultra)",
+        "Modos wenyan-* e ptbr-* NAO existem no fork"
+      ],
+      "relatedDecisions": ["ADR-007"]
+    }
+  ]
+}

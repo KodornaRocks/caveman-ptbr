@@ -1,7 +1,7 @@
 # caveman — uninstaller for the SessionStart + UserPromptSubmit hooks (Windows PowerShell)
 # Removes: hook files in ~/.claude/hooks, settings.json entries, and the flag file
 # Usage: powershell -ExecutionPolicy Bypass -File hooks\uninstall.ps1
-#   or:  irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks/uninstall.ps1 | iex
+#   or:  irm https://raw.githubusercontent.com/KodornaRocks/caveman-ptbr/main/hooks/uninstall.ps1 | iex
 param()
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +11,7 @@ $HooksDir = Join-Path $ClaudeDir "hooks"
 $Settings = Join-Path $ClaudeDir "settings.json"
 $FlagFile = Join-Path $ClaudeDir ".caveman-active"
 
-$HookFiles = @("caveman-config.js", "caveman-activate.js", "caveman-mode-tracker.js", "caveman-statusline.sh", "caveman-statusline.ps1")
+$HookFiles = @("caveman-config.js", "caveman-i18n.js", "caveman-activate.js", "caveman-mode-tracker.js", "caveman-statusline.sh", "caveman-statusline.ps1")
 
 # Detect if caveman is installed as a plugin
 $PluginInstalled = $false
@@ -118,7 +118,21 @@ console.log('  Removed ' + removed + ' caveman hook entries from settings.json')
     }
 }
 
-# 3. Remove flag file
+# 3. Remove locales/ installed by install.ps1
+$LocalesDest = Join-Path $ClaudeDir "locales"
+if (Test-Path $LocalesDest) {
+    Remove-Item $LocalesDest -Recurse -Force
+    Write-Host "  Removed: $LocalesDest"
+}
+
+# 4. Remove caveman-compress/scripts/i18n.py installed by install.ps1
+$I18nPy = Join-Path $ClaudeDir "caveman-compress\scripts\i18n.py"
+if (Test-Path $I18nPy) {
+    Remove-Item $I18nPy -Force
+    Write-Host "  Removed: $I18nPy"
+}
+
+# 5. Remove flag file
 if (Test-Path $FlagFile) {
     Remove-Item $FlagFile -Force
     Write-Host "  Removed: $FlagFile"

@@ -1,0 +1,27 @@
+{
+  "required": [
+    "hooks.activate.banner",
+    "hooks.activate.banner_with_mode",
+    "hooks.activate.statusline_nudge",
+    "hooks.activate.fallback_ruleset",
+    "hooks.mode_tracker.mode_set",
+    "hooks.mode_tracker.mode_cleared",
+    "cli.usage",
+    "cli.file_not_found",
+    "cli.not_a_file",
+    "cli.detected",
+    "cli.skipping_not_natural",
+    "cli.compress.starting",
+    "cli.compress.success",
+    "cli.compress.error",
+    "cli.compress.interrupted",
+    "cli.compress.processing",
+    "cli.compress.validating",
+    "cli.compress.validation_passed",
+    "cli.compress.validation_failed",
+    "cli.compress.fixing",
+    "cli.compress.failed_after_retries",
+    "cli.compress.original",
+    "cli.compress.compressed"
+  ]
+}

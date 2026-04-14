@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "activate": {
+      "banner": "CAVEMAN MODE ACTIVE.",
+      "banner_with_mode": "CAVEMAN MODE ACTIVE — level: {mode}",
+      "statusline_nudge": "STATUSLINE SETUP NEEDED: The caveman plugin includes a statusline badge showing active mode (e.g. [CAVEMAN], [CAVEMAN:ULTRA]). It is not configured yet. Add to ~/.claude/settings.json. Proactively offer to set this up for the user on first interaction.",
+      "fallback_ruleset": "CAVEMAN MODE ACTIVE — level: {mode}\n\nRespond terse like smart caveman. All technical substance stay. Only fluff die.\n\n## Persistence\n\nACTIVE EVERY RESPONSE. No revert after many turns. No filler drift. Still active if unsure. Off only: \"stop caveman\" / \"normal mode\".\n\nCurrent level: **{mode}**. Switch: `/caveman lite|full|ultra`."
+    },
+    "mode_tracker": {
+      "mode_set": "Caveman mode: {mode}",
+      "mode_cleared": "Caveman mode cleared."
+    }
+  },
+  "cli": {
+    "usage": "Usage: caveman <filepath>",
+    "file_not_found": "File not found: {file}",
+    "not_a_file": "Not a file: {file}",
+    "detected": "Detected: {type}",
+    "skipping_not_natural": "Skipping: file is not natural language (code/config)",
+    "compress": {
+      "starting": "Starting caveman compression...",
+      "success": "Compression completed successfully",
+      "error": "Error: {message}",
+      "interrupted": "Interrupted by user",
+      "processing": "Processing: {file}",
+      "validating": "Validation attempt {attempt}",
+      "validation_passed": "Validation passed",
+      "validation_failed": "Validation failed:",
+      "fixing": "Fixing with Claude...",
+      "failed_after_retries": "Failed after retries — original restored",
+      "original": "Original:   {file}",
+      "compressed": "Compressed: {file}"
+    }
+  }
+}

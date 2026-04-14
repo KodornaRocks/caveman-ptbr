@@ -5,9 +5,15 @@ on:
     branches: [main]
     paths:
       - skills/caveman/SKILL.md
+      - skills/caveman/SKILL.pt-br.md
+      - skills/caveman-commit/SKILL.pt-br.md
+      - skills/caveman-review/SKILL.pt-br.md
+      - skills/caveman-help/SKILL.pt-br.md
       - rules/caveman-activate.md
       - caveman-compress/SKILL.md
+      - caveman-compress/SKILL.pt-br.md
       - caveman-compress/scripts/**
+      - locales/**
 
 concurrency:
   group: sync-skill
@@ -29,6 +35,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
 
+      - name: Verify locales before sync
+        run: python3 tests/verify_locales.py
+
       - name: Sync SKILL.md copies
         run: |
           cp skills/caveman/SKILL.md caveman/SKILL.md
@@ -36,6 +45,20 @@ jobs:
           cp skills/caveman/SKILL.md .cursor/skills/caveman/SKILL.md
           mkdir -p .windsurf/skills/caveman
           cp skills/caveman/SKILL.md .windsurf/skills/caveman/SKILL.md
+
+      - name: Sync SKILL.pt-br.md copies
+        run: |
+          # Sync SKILL.pt-br.md to the same 4 SKILL.md destinations (parallel PT-BR files)
+          if [ -f skills/caveman/SKILL.pt-br.md ]; then
+            cp skills/caveman/SKILL.pt-br.md caveman/SKILL.pt-br.md
+            cp skills/caveman/SKILL.pt-br.md plugins/caveman/skills/caveman/SKILL.pt-br.md
+            cp skills/caveman/SKILL.pt-br.md .cursor/skills/caveman/SKILL.pt-br.md
+            mkdir -p .windsurf/skills/caveman
+            cp skills/caveman/SKILL.pt-br.md .windsurf/skills/caveman/SKILL.pt-br.md
+          fi
+          # Sync locales/ to plugin so it has i18n data at runtime
+          mkdir -p plugins/caveman/locales
+          cp locales/*.json plugins/caveman/locales/
 
       - name: Sync compress skill to plugin
         run: |
@@ -50,7 +73,10 @@ jobs:
           rm -rf plugins/caveman/skills/compress/scripts/__pycache__
 
       - name: Rebuild caveman.skill ZIP
-        run: cd skills && zip -r ../caveman.skill caveman/
+        # Include SKILL.pt-br.md and locales/ so the ZIP ships the full PT-BR fork
+        run: |
+          cd skills && zip -r ../caveman.skill caveman/
+          zip -r caveman.skill locales/
 
       - name: Sync auto-activation rules
         run: |
@@ -75,10 +101,15 @@ jobs:
         run: |
           git add \
             caveman/SKILL.md \
+            caveman/SKILL.pt-br.md \
             plugins/caveman/skills/compress/ \
             plugins/caveman/skills/caveman/SKILL.md \
+            plugins/caveman/skills/caveman/SKILL.pt-br.md \
+            plugins/caveman/locales/ \
             .cursor/skills/caveman/SKILL.md \
+            .cursor/skills/caveman/SKILL.pt-br.md \
             .windsurf/skills/caveman/SKILL.md \
+            .windsurf/skills/caveman/SKILL.pt-br.md \
             caveman.skill \
             .clinerules/caveman.md \
             .github/copilot-instructions.md \

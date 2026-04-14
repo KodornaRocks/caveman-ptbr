@@ -33,9 +33,6 @@ process.stdin.on('end', () => {
       } else if (cmd === '/caveman' || cmd === '/caveman:caveman') {
         if (arg === 'lite') mode = 'lite';
         else if (arg === 'ultra') mode = 'ultra';
-        else if (arg === 'wenyan-lite') mode = 'wenyan-lite';
-        else if (arg === 'wenyan' || arg === 'wenyan-full') mode = 'wenyan';
-        else if (arg === 'wenyan-ultra') mode = 'wenyan-ultra';
         else mode = getDefaultMode();
       }
 

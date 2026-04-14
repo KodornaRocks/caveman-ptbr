@@ -1,0 +1,51 @@
+{
+  "projectName": "caveman-ptbr",
+  "lastUpdated": "2026-04-14T00:00:00.000Z",
+  "currentPhase": "planning",
+  "activeTasks": [],
+  "blockers": [],
+  "executionOrder": [
+    "EPIC-1 (ADR-004): TASK-001 -> TASK-002 + TASK-003 (paralelo) -> TASK-004",
+    "EPIC-2 (ADR-003): TASK-005 -> TASK-006 -> TASK-007 + TASK-008 (paralelo) -> TASK-009",
+    "EPIC-3 (ADR-002): TASK-015 (paralelo a todos) ; TASK-010 + TASK-011 + TASK-012 + TASK-013 (paralelos) -> TASK-014 -> TASK-016",
+    "EPIC-4 (ADR-005): TASK-017 + TASK-021 (paralelos) ; TASK-018 -> TASK-019 -> TASK-020 -> TASK-022",
+    "EPIC-5 (ADR-006): TASK-027 (paralela cedo) ; TASK-023 + TASK-024 -> TASK-025 -> TASK-026 -> TASK-028",
+    "EPIC-6 (Docs): TASK-029 -> TASK-030 ; TASK-031..TASK-040 em paralelo conforme disponibilidade"
+  ],
+  "metrics": {
+    "total": 40,
+    "completed": 0,
+    "inProgress": 0,
+    "ready": 22,
+    "blocked": 18,
+    "done": 0,
+    "byEpic": {
+      "EPIC-1": { "total": 4, "ready": 1, "blocked": 3 },
+      "EPIC-2": { "total": 5, "ready": 1, "blocked": 4 },
+      "EPIC-3": { "total": 7, "ready": 1, "blocked": 6 },
+      "EPIC-4": { "total": 6, "ready": 2, "blocked": 4 },
+      "EPIC-5": { "total": 6, "ready": 1, "blocked": 5 },
+      "EPIC-6": { "total": 12, "ready": 11, "blocked": 1 }
+    },
+    "byAgent": {
+      "developer": 19,
+      "refactorer": 4,
+      "tester": 5,
+      "devops": 4,
+      "doc-writer": 8
+    }
+  },
+  "criticalPath": [
+    "TASK-001 (scaffolding locales)",
+    "TASK-002 (caveman-i18n.js)",
+    "TASK-005 (required_keys.json)",
+    "TASK-006 (verify_locales.py)",
+    "TASK-007/008 (seeds locales)",
+    "TASK-010 (migrar activate.js)",
+    "TASK-017 (secao caveman-ptbr em SKILL.md)",
+    "TASK-018 (mode tracker ptbr)",
+    "TASK-023 (CI sync PT-BR)",
+    "TASK-029 (README.pt-br.md)"
+  ],
+  "notes": "Primeiro sprint sugerido: TASK-001 -> TASK-002 -> TASK-003 -> TASK-005 -> TASK-006 -> TASK-007 -> TASK-008 -> TASK-004 -> TASK-009. Com isso fecham-se EPICs 1 e 2, que destravam 60% do restante."
+}

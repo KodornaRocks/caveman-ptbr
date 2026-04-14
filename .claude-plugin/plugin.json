@@ -1,6 +1,6 @@
 {
   "name": "caveman",
-  "description": "Ultra-compressed communication mode. Cuts ~75% of tokens while keeping full technical accuracy by speaking like a caveman.",
+  "description": "Modo de comunicação ultra-comprimido. Corta ~75% dos tokens mantendo precisão técnica completa falando como caveman.",
   "author": {
     "name": "Julius Brussee",
     "url": "https://github.com/JuliusBrussee"
@@ -13,7 +13,7 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/caveman-activate.js",
             "timeout": 5,
-            "statusMessage": "Loading caveman mode..."
+            "statusMessage": "Carregando modo caveman..."
           }
         ]
       }
@@ -25,7 +25,7 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/caveman-mode-tracker.js",
             "timeout": 5,
-            "statusMessage": "Tracking caveman mode..."
+            "statusMessage": "Rastreando modo caveman..."
           }
         ]
       }

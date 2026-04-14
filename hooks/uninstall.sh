@@ -2,7 +2,7 @@
 # caveman — uninstaller for the SessionStart + UserPromptSubmit hooks
 # Removes: hook files in ~/.claude/hooks, settings.json entries, and the flag file
 # Usage: bash hooks/uninstall.sh
-#   or:  bash <(curl -s https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks/uninstall.sh)
+#   or:  bash <(curl -s https://raw.githubusercontent.com/KodornaRocks/caveman-ptbr/main/hooks/uninstall.sh)
 set -e
 
 CLAUDE_DIR="$HOME/.claude"
@@ -10,7 +10,7 @@ HOOKS_DIR="$CLAUDE_DIR/hooks"
 SETTINGS="$CLAUDE_DIR/settings.json"
 FLAG_FILE="$CLAUDE_DIR/.caveman-active"
 
-HOOK_FILES=("caveman-config.js" "caveman-activate.js" "caveman-mode-tracker.js" "caveman-statusline.sh")
+HOOK_FILES=("caveman-config.js" "caveman-i18n.js" "caveman-activate.js" "caveman-mode-tracker.js" "caveman-statusline.sh")
 
 # Detect if caveman is installed as a plugin (check plugin cache)
 PLUGIN_INSTALLED=0
@@ -113,7 +113,21 @@ if [ -f "$SETTINGS.bak" ]; then
   echo "  Removed: $SETTINGS.bak"
 fi
 
-# 4. Remove flag file
+# 4. Remove locales/ installed by install.sh
+LOCALES_DEST="$CLAUDE_DIR/locales"
+if [ -d "$LOCALES_DEST" ]; then
+  rm -rf "$LOCALES_DEST"
+  echo "  Removed: $LOCALES_DEST"
+fi
+
+# 5. Remove caveman-compress/scripts/i18n.py installed by install.sh
+I18N_PY="$CLAUDE_DIR/caveman-compress/scripts/i18n.py"
+if [ -f "$I18N_PY" ]; then
+  rm "$I18N_PY"
+  echo "  Removed: $I18N_PY"
+fi
+
+# 7. Remove flag file
 if [ -f "$FLAG_FILE" ]; then
   rm "$FLAG_FILE"
   echo "  Removed: $FLAG_FILE"

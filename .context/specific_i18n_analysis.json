@@ -1,0 +1,217 @@
+{
+  "topic": "Análise i18n para fork PT-BR / EN simplificado",
+  "lastUpdated": "2026-04-14T00:00:00.000Z",
+  "goal": "Embasar decisão arquitetural de dual-language: PT-BR primário / EN simplificado",
+
+  "1_estrutura_geral": {
+    "linguagem_principal": "Markdown (conteúdo) + JavaScript Node.js (hooks) + Python 3.10+ (caveman-compress CLI) + Bash (statusline/install scripts)",
+    "stack": "Zero dependências de runtime para hooks JS (Node.js stdlib apenas). Python usa anthropic SDK opcionalmente, com fallback para claude CLI.",
+    "build_system": "Nenhum build system formal. CI GitHub Actions (sync-skill.yml) age como 'build': copia fontes para destinos, recompila caveman.skill ZIP.",
+    "package_managers": "uv para Python (benchmarks e evals). Nenhum npm/yarn — hooks JS são scripts standalone.",
+    "entrypoints_usuario": [
+      "Claude Code: claude plugin install caveman@caveman (plugin) ou bash hooks/install.sh (standalone)",
+      "Outros agentes: npx skills add JuliusBrussee/caveman",
+      "Ativação: /caveman | 'caveman mode' | 'less tokens'",
+      "Desativação: 'stop caveman' | 'normal mode'",
+      "Compress: /caveman:compress <filepath>"
+    ]
+  },
+
+  "2_strings_hardcoded_usuario": {
+    "resumo": "Todo o conteúdo orientado ao usuário está em inglês. As strings estão distribuídas em 5 categorias de arquivos.",
+    "categoria_skill_content": {
+      "descricao": "O comportamento principal — caveman-speak é broken English proposital. ESTA É A FEATURE.",
+      "arquivos": [
+        "skills/caveman/SKILL.md — regras completas, exemplos (React, DB pooling), tabela de intensidade, wenyan modes",
+        "skills/caveman-commit/SKILL.md — regras de commit, exemplos feat/fix com scope EN, mensagens de breaking change",
+        "skills/caveman-review/SKILL.md — formato de review L42/L88, exemplos de PR comments em EN",
+        "skills/caveman-help/SKILL.md — card de referência completo, config guide",
+        "caveman-compress/SKILL.md — regras de compressão, exemplos de prose original/compressed em EN",
+        "rules/caveman-activate.md — snippet de auto-ativação minimalista"
+      ],
+      "nota_i18n": "Os EXEMPLOS dentro dos SKILL.md são todos em EN (React component, auth middleware, DB pooling, git rebase). Para PT-BR primário, os exemplos deveriam ser em PT-BR ou bilíngues."
+    },
+    "categoria_hooks_js": {
+      "arquivos": ["hooks/caveman-activate.js", "hooks/caveman-mode-tracker.js", "hooks/caveman-statusline.sh", "hooks/caveman-statusline.ps1"],
+      "strings_hardcoded": [
+        "'CAVEMAN MODE ACTIVE — level: ' + modeLabel (caveman-activate.js:48,96)",
+        "'CAVEMAN MODE ACTIVE — level: ' + mode + '. Behavior defined by /caveman-' + mode + ' skill.' (caveman-activate.js:48)",
+        "'STATUSLINE SETUP NEEDED: The caveman plugin includes a statusline badge...' (caveman-activate.js:138-143)",
+        "Fallback ruleset hardcoded em inglês (caveman-activate.js:101-115): 'Respond terse like smart caveman...', 'ACTIVE EVERY RESPONSE...', padrões Not/Yes",
+        "'statusLine': { 'type': 'command', 'command': ... } snippet (caveman-activate.js:136)",
+        "Badge '[CAVEMAN]' e '[CAVEMAN:<MODE>]' no statusline (caveman-statusline.sh + .ps1)",
+        "'Loading caveman mode...' e 'Tracking caveman mode...' (plugin.json:statusMessage)"
+      ]
+    },
+    "categoria_python_cli": {
+      "arquivos": ["caveman-compress/scripts/cli.py", "caveman-compress/scripts/compress.py", "caveman-compress/scripts/detect.py"],
+      "strings_hardcoded": [
+        "cli.py: 'Usage: caveman <filepath>', 'File not found:', 'Not a file:', 'Detected:', 'Skipping: file is not natural language (code/config)', 'Starting caveman compression...', 'Compression completed successfully', 'Compressed:', 'Original:', 'Interrupted by user', 'Error:'",
+        "compress.py: 'Processing:', 'Skipping (not natural language)', 'Compressing with Claude...', 'Validation attempt N', 'Validation passed', 'Validation failed:', 'Fixing with Claude...', 'Failed after retries — original restored', emojis ⚠️ e ❌ com texto",
+        "compress.py build_compress_prompt(): prompt para LLM completamente em EN — 'Compress this markdown into caveman format. STRICT RULES: ...'",
+        "compress.py build_fix_prompt(): prompt de correção em EN — 'You are fixing a caveman-compressed markdown file...'",
+        "detect.py: 'Usage: python detect.py <file1> [file2] ...'"
+      ]
+    },
+    "categoria_install_scripts": {
+      "arquivos": ["hooks/install.sh", "hooks/install.ps1", "hooks/uninstall.sh", "hooks/uninstall.ps1", "hooks/README.md"],
+      "nota": "Scripts bash/PowerShell com output de status para o usuário durante instalação. Não lidos em detalhe — verificar manualmente para inventory completo de strings."
+    },
+    "categoria_readme_docs": {
+      "arquivos": ["README.md (403 linhas)", "CONTRIBUTING.md (20 linhas)", "caveman-compress/README.md (163 linhas)", "hooks/README.md (107 linhas)", "evals/README.md (84 linhas)", "docs/index.html (441 linhas)"],
+      "nota": "Documentação pública totalmente em EN. README é explicitamente descrito no CLAUDE.md como 'product artifact / product front door' com voice proposital caveman ('Brain still big.', 'One rock. That it.'). Adaptar para PT-BR exige preservar a voz."
+    },
+    "categoria_ascii_art_badges": {
+      "descricao": "Não há ASCII art além da tabela de progresso no README (TOKENS SAVED ████████ 75%). Badge de statusline é texto puro [CAVEMAN] / [CAVEMAN:ULTRA]."
+    }
+  },
+
+  "3_documentacao_existente": {
+    "readme_principal": { "path": "README.md", "linhas": 403, "idioma": "EN", "nota": "Inclui Before/After examples, install table completa (7 agentes), feature matrix, caveman voice intencional." },
+    "contributing": { "path": "CONTRIBUTING.md", "linhas": 20, "idioma": "EN" },
+    "caveman_compress_readme": { "path": "caveman-compress/README.md", "linhas": 163, "idioma": "EN" },
+    "hooks_readme": { "path": "hooks/README.md", "linhas": 107, "idioma": "EN" },
+    "evals_readme": { "path": "evals/README.md", "linhas": 84, "idioma": "EN" },
+    "docs_html": { "path": "docs/index.html", "linhas": 441, "idioma": "EN", "nota": "Página estática (GitHub Pages presumível)." },
+    "claude_md": { "path": "CLAUDE.md", "linhas": "~100", "idioma": "EN (comprimido por caveman-compress)", "nota": "Instruções para agentes que trabalham no repo. CLAUDE.original.md é a versão humana." },
+    "gemini_md": { "path": "GEMINI.md", "idioma": "EN" },
+    "agents_md": { "path": "AGENTS.md", "idioma": "N/A", "nota": "Apenas 4 linhas referenciando SKILL.md files via @path." },
+    "security_md": { "path": "caveman-compress/SECURITY.md", "idioma": "EN" }
+  },
+
+  "4_fixtures_adaptacao_cultural": {
+    "evals_prompts": {
+      "path": "evals/prompts/en.txt",
+      "linhas": 10,
+      "idioma": "EN",
+      "conteudo": "Perguntas técnicas de dev em inglês: React re-render, memory leak Node.js, CORS errors, git rebase vs merge, hash table collisions, SQL EXPLAIN, debouncer, queue vs topic.",
+      "impacto_i18n": "ALTO — para fork PT-BR, esses prompts devem ser traduzidos/adaptados. Cria também evals/prompts/pt-br.txt ou substitui."
+    },
+    "benchmarks_prompts": {
+      "path": "benchmarks/prompts.json",
+      "linhas": 55,
+      "idioma": "EN",
+      "conteudo": "10 cenários técnicos em EN: React props, Express JWT, PostgreSQL pool, git rebase, async/await refactor, Django microservices, SQL injection vulnerability, Docker multi-stage, race condition, React error boundary.",
+      "impacto_i18n": "ALTO — para benchmark honesto em PT-BR, devem ser traduzidos."
+    },
+    "exemplos_skill_content": {
+      "descricao": "Exemplos dentro dos SKILL.md usam contexto dev típico anglo-americano (auth middleware, useMemo, Express routes). Tecnicamente neutros (não há nomes de empresas ou referências culturais específicas), mas o idioma é EN.",
+      "impacto_i18n": "MÉDIO — traduzir exemplos para PT-BR melhora compreensão para usuários BR."
+    },
+    "testes_compress_fixtures": {
+      "path": "tests/caveman-compress/",
+      "arquivos": "5 pares .original.md / .md",
+      "idioma": "EN",
+      "conteudo": "claude-md-preferences, claude-md-project, mixed-with-code, project-notes, todo-list — todos em inglês com contexto genérico de desenvolvimento.",
+      "impacto_i18n": "MÉDIO — manter fixtures EN para compatibilidade, adicionar fixtures PT-BR separadas para validar compressão de texto português."
+    }
+  },
+
+  "5_testes": {
+    "framework": "Python unittest (stdlib)",
+    "arquivos": [
+      "tests/test_hooks.py — 4 testes de integração para hooks JS (install/uninstall/activate flow via subprocess)",
+      "tests/verify_repo.py — script de verificação estrutural do repo (não é unittest, é script standalone com CheckFailure exceptions)"
+    ],
+    "cobertura_aparente": "Hooks JS: install/uninstall/activate/statusline testados via subprocess. Compress: fixtures testadas via verify_repo.py (validate.py + detect.py). Synced files: verificado por verify_repo.py. Sem cobertura para: comportamento semântico do LLM, SKILL.md em si.",
+    "como_rodar": "python -m pytest tests/ OU python tests/test_hooks.py; python tests/verify_repo.py",
+    "dependencias_teste": "Node.js + bash (ambos requeridos para test_hooks.py). Python stdlib apenas.",
+    "sem_ci_para_testes": "O workflow sync-skill.yml NÃO roda os testes. Testes são para execução local."
+  },
+
+  "6_cicd": {
+    "workflows": [
+      {
+        "arquivo": ".github/workflows/sync-skill.yml",
+        "trigger": "push em main quando skills/caveman/SKILL.md, rules/caveman-activate.md, caveman-compress/SKILL.md ou caveman-compress/scripts/** mudam",
+        "o_que_faz": "1. Copia SKILL.md para 4 destinos (caveman/, plugins/, .cursor/, .windsurf/). 2. Sincroniza caveman-compress SKILL.md + scripts para plugin. 3. Reconstrói caveman.skill ZIP. 4. Gera arquivos de regra por agente (Cline, Copilot, Cursor com frontmatter, Windsurf com frontmatter). 5. Commit e push com [skip ci].",
+        "permissoes": "contents: write (commita de volta para main)"
+      }
+    ],
+    "sem_deploy": "Nenhum workflow de deploy, publish ou release automatizado.",
+    "sem_testes_ci": "CI não roda testes — apenas sincroniza arquivos.",
+    "impacto_i18n": "Para fork PT-BR, o workflow precisará ser adaptado ou reescrito para lidar com múltiplos idiomas de SKILL.md."
+  },
+
+  "7_dependencias_i18n": {
+    "libs_i18n_existentes": "NENHUMA. Zero dependências de internacionalização, locale, gettext, i18next ou similar.",
+    "dependencias_runtime_js": "Node.js stdlib apenas (fs, path, os) — zero npm packages.",
+    "dependencias_runtime_python": [
+      "anthropic SDK (opcional — fallback para claude CLI se não instalado)",
+      "tiktoken (apenas para evals/measure.py — medição de tokens offline)"
+    ],
+    "dependencias_dev_python": "uv como runner (não é dependência de código)",
+    "implicacao_i18n": "Qualquer solução i18n precisaria ser implementada do zero ou usando mecanismos nativos (arquivos separados por idioma, variáveis de ambiente, etc.). Não há infraestrutura de locale para aproveitar."
+  },
+
+  "8_areas_sensiveis_nao_tocar": {
+    "comportamento_core_caveman": {
+      "descricao": "A lógica de compressão de tokens — o próprio broken English caveman-speak — é a feature principal. Traduzir o OUTPUT do caveman para PT-BR mudaria fundamentalmente o produto.",
+      "recomendacao": "PT-BR deve ser o idioma da INTERFACE (triggers, docs, exemplos), não do OUTPUT caveman. O output caveman pode permanecer em EN ou ter modo PT-BR separado (ex: /caveman pt)."
+    },
+    "wenyan_mode": {
+      "descricao": "Modo 文言文 (Wenyan) em Chinês Clássico — feature deliberada multi-idioma. Confirmar que fork PT-BR não quebra este modo.",
+      "arquivos": ["skills/caveman/SKILL.md (seção wenyan-*)", "hooks/caveman-mode-tracker.js (linhas 37-38)"]
+    },
+    "hooks_js_logica": {
+      "descricao": "Lógica de flag file (~/.claude/.caveman-active), leitura de SKILL.md em runtime, silent-fail em erros de filesystem. Crítico para não bloquear SessionStart.",
+      "arquivos": ["hooks/caveman-activate.js", "hooks/caveman-mode-tracker.js", "hooks/caveman-config.js"]
+    },
+    "sync_ci_mecanismo": {
+      "descricao": "O mecanismo de single source of truth (skills/caveman/SKILL.md → 9 destinos via CI) deve ser preservado. Editar cópias diretamente causa divergência.",
+      "arquivos": [".github/workflows/sync-skill.yml", "CLAUDE.md (seção 'Auto-generated files')"]
+    },
+    "compress_validation": {
+      "descricao": "validate.py verifica headings, code blocks, URLs, paths — algoritmos de validação são idioma-agnósticos e devem funcionar com PT-BR sem modificação.",
+      "arquivos": ["caveman-compress/scripts/validate.py", "caveman-compress/scripts/detect.py"]
+    },
+    "caveman_voice_readme": {
+      "descricao": "A voz caveman no README ('Brain still big.', 'One rock. That it.', 'Mass mammoth on open plain.') é brand intencional. Qualquer README PT-BR deve preservar a voz equivalente em português.",
+      "referencia": "CLAUDE.md: 'Preserve voice. Caveman speak in README on purpose.'"
+    },
+    "benchmark_numbers": {
+      "descricao": "Números de benchmark e eval devem ser reais (não inventados). Para fork PT-BR, rodar novos benchmarks com prompts em PT-BR.",
+      "referencia": "CLAUDE.md: 'Benchmark numbers from real runs. Never invent or round.'"
+    }
+  },
+
+  "9_idioma_atual": {
+    "confirmacao": "100% inglês em todo o conteúdo orientado ao usuário.",
+    "excecoes": [
+      "wenyan modes: output em Chinês Clássico (文言文) — feature intencional",
+      "exemplos wenyan em SKILL.md: texto em chinês como demontração de modo"
+    ],
+    "idioma_codigo": "EN (nomes de variáveis, comentários, docstrings — todos em inglês)",
+    "idioma_strings_output": "EN (mensagens CLI, hook output, badge statusline — todos em inglês)",
+    "idioma_docs": "EN (README, CONTRIBUTING, hooks/README, evals/README, caveman-compress/README)",
+    "idioma_prompts_llm": "EN (prompts internos de compressão e correção em compress.py, evals prompts, benchmark prompts)"
+  },
+
+  "mapa_esforco_i18n": {
+    "tier_alto_impacto": [
+      "skills/caveman/SKILL.md — criar pt-br/SKILL.md com exemplos em PT-BR e triggers em PT-BR (ex: 'modo caveman', 'menos tokens')",
+      "evals/prompts/en.txt → criar evals/prompts/pt-br.txt com 10 perguntas técnicas equivalentes em PT-BR",
+      "benchmarks/prompts.json → adicionar prompts PT-BR ou criar pt-br variant",
+      "README.md — versão PT-BR com voice caveman equivalente (README.pt-br.md ou README localizado)"
+    ],
+    "tier_medio_impacto": [
+      "hooks/caveman-activate.js — strings hardcoded de statusline setup, fallback ruleset, banner 'CAVEMAN MODE ACTIVE'",
+      "caveman-compress/scripts/cli.py e compress.py — mensagens de output do CLI",
+      "caveman-compress/scripts/compress.py — prompts internos para o LLM (build_compress_prompt, build_fix_prompt)",
+      "skills/caveman-commit/SKILL.md, skills/caveman-review/SKILL.md — exemplos e mensagens"
+    ],
+    "tier_baixo_impacto": [
+      "hooks/caveman-statusline.sh + .ps1 — apenas badge [CAVEMAN] (sem texto em prosa)",
+      "caveman-compress/scripts/validate.py, detect.py — idioma-agnósticos, nenhuma string visível ao usuário final",
+      "tests/ — testes internos, sem impacto no usuário",
+      ".github/workflows/sync-skill.yml — infraestrutura, sem impacto no usuário"
+    ],
+    "nao_tocar": [
+      "Output core do caveman-speak (broken EN) — é a feature",
+      "wenyan modes (Chinese output)",
+      "Mecanismo de flag file (~/.claude/.caveman-active)",
+      "Lógica de silent-fail dos hooks",
+      "validate.py / detect.py (idioma-agnósticos)"
+    ]
+  }
+}

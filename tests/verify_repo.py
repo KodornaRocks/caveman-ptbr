@@ -60,6 +60,27 @@ def read_json(path: Path) -> object:
     return json.loads(path.read_text())
 
 
+def verify_locales_and_i18n_files() -> None:
+    section("Locales and i18n Files")
+
+    # Locale JSON files must exist and be valid JSON
+    for locale_file in ["pt-br.json", "en.json"]:
+        path = ROOT / "locales" / locale_file
+        ensure(path.exists(), f"locales/{locale_file} is missing")
+        data = read_json(path)
+        ensure(isinstance(data, dict), f"locales/{locale_file} must be a JSON object")
+
+    # caveman-i18n.js must exist
+    i18n_js = ROOT / "hooks" / "caveman-i18n.js"
+    ensure(i18n_js.exists(), "hooks/caveman-i18n.js is missing")
+
+    # caveman-compress/scripts/i18n.py must exist
+    i18n_py = ROOT / "caveman-compress" / "scripts" / "i18n.py"
+    ensure(i18n_py.exists(), "caveman-compress/scripts/i18n.py is missing")
+
+    print("locales/pt-br.json, locales/en.json, caveman-i18n.js, i18n.py all present and valid")
+
+
 def verify_synced_files() -> None:
     section("Synced Files")
     skill_source = ROOT / "skills/caveman/SKILL.md"
@@ -106,17 +127,20 @@ def verify_manifests_and_syntax() -> None:
         read_json(path)
 
     run(["node", "--check", "hooks/caveman-config.js"])
+    run(["node", "--check", "hooks/caveman-i18n.js"])
     run(["node", "--check", "hooks/caveman-activate.js"])
     run(["node", "--check", "hooks/caveman-mode-tracker.js"])
     run(["bash", "-n", "hooks/install.sh"])
     run(["bash", "-n", "hooks/uninstall.sh"])
     run(["bash", "-n", "hooks/caveman-statusline.sh"])
 
-    # Ensure install/uninstall scripts include caveman-config.js
+    # Ensure install/uninstall scripts include caveman-config.js and caveman-i18n.js
     install_sh = (ROOT / "hooks/install.sh").read_text()
     uninstall_sh = (ROOT / "hooks/uninstall.sh").read_text()
     ensure("caveman-config.js" in install_sh, "install.sh missing caveman-config.js")
     ensure("caveman-config.js" in uninstall_sh, "uninstall.sh missing caveman-config.js")
+    ensure("caveman-i18n.js" in install_sh, "install.sh missing caveman-i18n.js")
+    ensure("caveman-i18n.js" in uninstall_sh, "uninstall.sh missing caveman-i18n.js")
 
     print("JSON manifests and JS/bash syntax OK")
 
@@ -172,25 +196,28 @@ def verify_compress_fixtures() -> None:
 def verify_compress_cli() -> None:
     section("Compress CLI")
 
+    # Use pt-br explicitly (default locale of the fork) for deterministic output
     skip_result = run(
         ["python3", "-m", "scripts", "../hooks/install.sh"],
         cwd=ROOT / "caveman-compress",
+        env={"CAVEMAN_LANG": "pt-br"},
         check=False,
     )
     ensure(skip_result.returncode == 0, "compress CLI skip path should exit 0")
-    ensure("Detected: code" in skip_result.stdout, "compress CLI skip path missing detection output")
+    ensure("Detectado:" in skip_result.stdout, "compress CLI skip path missing detection output")
     ensure(
-        "Skipping: file is not natural language" in skip_result.stdout,
+        "Pulando:" in skip_result.stdout,
         "compress CLI skip path missing skip output",
     )
 
     missing_result = run(
         ["python3", "-m", "scripts", "../does-not-exist.md"],
         cwd=ROOT / "caveman-compress",
+        env={"CAVEMAN_LANG": "pt-br"},
         check=False,
     )
     ensure(missing_result.returncode == 1, "compress CLI missing-file path should exit 1")
-    ensure("File not found" in missing_result.stdout, "compress CLI missing-file output mismatch")
+    ensure("não encontrado" in missing_result.stdout or "not found" in missing_result.stdout, "compress CLI missing-file output mismatch")
 
     print("Compress CLI skip/error paths OK")
 
@@ -223,25 +250,25 @@ def verify_hook_install_flow() -> None:
 
         activate = run(
             ["node", "hooks/caveman-activate.js"],
-            env={"HOME": str(home)},
+            env={"HOME": str(home), "CAVEMAN_LANG": "pt-br"},
         )
-        ensure("CAVEMAN MODE ACTIVE." in activate.stdout, "activation output missing caveman banner")
-        ensure("STATUSLINE SETUP NEEDED" not in activate.stdout, "activation should stay quiet when custom statusline exists")
+        ensure("MODO CAVEMAN ATIVO" in activate.stdout, "activation output missing caveman banner")
+        ensure("STATUSLINE PRECISAR CONFIGURAR" not in activate.stdout, "activation should stay quiet when custom statusline exists")
         ensure((claude_dir / ".caveman-active").read_text() == "full", "activation flag should default to full")
 
         # Test configurable default mode via CAVEMAN_DEFAULT_MODE env var
         activate_custom = run(
             ["node", "hooks/caveman-activate.js"],
-            env={"HOME": str(home), "CAVEMAN_DEFAULT_MODE": "ultra"},
+            env={"HOME": str(home), "CAVEMAN_DEFAULT_MODE": "ultra", "CAVEMAN_LANG": "pt-br"},
         )
-        ensure("CAVEMAN MODE ACTIVE." in activate_custom.stdout, "activation with custom default missing banner")
+        ensure("MODO CAVEMAN ATIVO" in activate_custom.stdout, "activation with custom default missing banner")
         ensure((claude_dir / ".caveman-active").read_text() == "ultra", "CAVEMAN_DEFAULT_MODE=ultra should set flag to ultra")
         # Test "off" mode — activation skipped, flag removed
         activate_off = run(
             ["node", "hooks/caveman-activate.js"],
-            env={"HOME": str(home), "CAVEMAN_DEFAULT_MODE": "off"},
+            env={"HOME": str(home), "CAVEMAN_DEFAULT_MODE": "off", "CAVEMAN_LANG": "pt-br"},
         )
-        ensure("CAVEMAN MODE ACTIVE." not in activate_off.stdout, "off mode should not emit caveman banner")
+        ensure("MODO CAVEMAN ATIVO" not in activate_off.stdout, "off mode should not emit caveman banner")
         ensure(not (claude_dir / ".caveman-active").exists(), "off mode should remove flag file")
 
         # Test mode tracker with /caveman when default is off — should NOT write flag
@@ -288,12 +315,12 @@ def verify_hook_install_flow() -> None:
         )
         ensure(not (claude_dir / ".caveman-active").exists(), "normal mode should remove flag file")
 
-        (claude_dir / ".caveman-active").write_text("wenyan-ultra")
+        (claude_dir / ".caveman-active").write_text("ultra")
         statusline = run(
             ["bash", "hooks/caveman-statusline.sh"],
             env={"HOME": str(home)},
         )
-        ensure("[CAVEMAN:WENYAN-ULTRA]" in statusline.stdout, "statusline badge output mismatch")
+        ensure("[CAVEMAN:ULTRA]" in statusline.stdout, "statusline badge output mismatch")
 
         reinstall = run(["bash", "hooks/install.sh"], env={"HOME": str(home)})
         ensure("Nothing to do" in reinstall.stdout, "install.sh should be idempotent")
@@ -309,8 +336,8 @@ def verify_hook_install_flow() -> None:
         claude_dir = home / ".claude"
         settings = read_json(claude_dir / "settings.json")
         ensure("statusLine" in settings, "fresh install should configure statusline")
-        activate = run(["node", "hooks/caveman-activate.js"], env={"HOME": str(home)})
-        ensure("STATUSLINE SETUP NEEDED" not in activate.stdout, "fresh install should not nudge for statusline")
+        activate = run(["node", "hooks/caveman-activate.js"], env={"HOME": str(home), "CAVEMAN_LANG": "pt-br"})
+        ensure("STATUSLINE PRECISAR CONFIGURAR" not in activate.stdout, "fresh install should not nudge for statusline")
         run(["bash", "hooks/uninstall.sh"], env={"HOME": str(home)})
         ensure(read_json(claude_dir / "settings.json") == {}, "fresh uninstall should leave empty settings")
 
@@ -319,6 +346,7 @@ def verify_hook_install_flow() -> None:
 
 def main() -> int:
     checks = [
+        verify_locales_and_i18n_files,
         verify_synced_files,
         verify_manifests_and_syntax,
         verify_powershell_static,

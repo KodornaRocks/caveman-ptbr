@@ -2,7 +2,7 @@
 # caveman — one-command hook installer for Claude Code
 # Installs: SessionStart hook (auto-load rules) + UserPromptSubmit hook (mode tracking)
 # Usage: bash hooks/install.sh
-#   or:  bash <(curl -s https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks/install.sh)
+#   or:  bash <(curl -s https://raw.githubusercontent.com/KodornaRocks/caveman-ptbr/main/hooks/install.sh)
 #   or:  bash hooks/install.sh --force   (re-install over existing hooks)
 set -e
 
@@ -35,9 +35,9 @@ fi
 CLAUDE_DIR="$HOME/.claude"
 HOOKS_DIR="$CLAUDE_DIR/hooks"
 SETTINGS="$CLAUDE_DIR/settings.json"
-REPO_URL="https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks"
+REPO_URL="https://raw.githubusercontent.com/KodornaRocks/caveman-ptbr/main/hooks"
 
-HOOK_FILES=("caveman-config.js" "caveman-activate.js" "caveman-mode-tracker.js" "caveman-statusline.sh")
+HOOK_FILES=("caveman-config.js" "caveman-i18n.js" "caveman-activate.js" "caveman-mode-tracker.js" "caveman-statusline.sh")
 
 # Resolve source — works from repo clone or curl pipe
 SCRIPT_DIR=""
@@ -116,6 +116,34 @@ done
 
 # Make statusline script executable
 chmod +x "$HOOKS_DIR/caveman-statusline.sh"
+
+# 2b. Copy locales/ to ~/.claude/locales/ (idempotent — only copies if source exists)
+LOCALES_DEST="$CLAUDE_DIR/locales"
+REPO_LOCALES_DIR=""
+if [ -n "$SCRIPT_DIR" ] && [ -d "$SCRIPT_DIR/../locales" ]; then
+  REPO_LOCALES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/locales"
+fi
+if [ -n "$REPO_LOCALES_DIR" ]; then
+  mkdir -p "$LOCALES_DEST"
+  for locale_file in "$REPO_LOCALES_DIR"/*.json; do
+    [ -f "$locale_file" ] || continue
+    dest_file="$LOCALES_DEST/$(basename "$locale_file")"
+    cp "$locale_file" "$dest_file"
+    echo "  Installed locale: $dest_file"
+  done
+fi
+
+# 2c. Copy caveman-compress/scripts/i18n.py (idempotent)
+COMPRESS_SCRIPTS_DEST="$CLAUDE_DIR/caveman-compress/scripts"
+REPO_I18N_PY=""
+if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/../caveman-compress/scripts/i18n.py" ]; then
+  REPO_I18N_PY="$(cd "$SCRIPT_DIR/.." && pwd)/caveman-compress/scripts/i18n.py"
+fi
+if [ -n "$REPO_I18N_PY" ]; then
+  mkdir -p "$COMPRESS_SCRIPTS_DEST"
+  cp "$REPO_I18N_PY" "$COMPRESS_SCRIPTS_DEST/i18n.py"
+  echo "  Installed: $COMPRESS_SCRIPTS_DEST/i18n.py"
+fi
 
 # 3. Wire hooks + statusline into settings.json (idempotent)
 if [ ! -f "$SETTINGS" ]; then

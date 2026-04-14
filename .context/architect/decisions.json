@@ -1,0 +1,71 @@
+{
+  "projectName": "caveman-ptbr",
+  "lastUpdated": "2026-04-14T00:00:00.000Z",
+  "nextId": 8,
+  "decisions": [
+    {
+      "id": "ADR-001",
+      "title": "Estrategia dual-language: locale files JSON + runtime flag (CAVEMAN_LANG)",
+      "status": "accepted",
+      "date": "2026-04-14",
+      "file": "decision_001_dual_language_strategy.md",
+      "tags": ["i18n", "architecture", "core"],
+      "supersededBy": null
+    },
+    {
+      "id": "ADR-002",
+      "title": "Escopo: o que se traduz/adapta versus o que se preserva",
+      "status": "accepted",
+      "date": "2026-04-14",
+      "file": "decision_002_translation_scope.md",
+      "tags": ["i18n", "product", "content"],
+      "supersededBy": null,
+      "notes": "Parcialmente revogado por ADR-007: categoria 3 (preservar output EN caveman-speak) e categoria 7 (wenyan intocado) nao valem mais. Output default agora e PT-BR nativo; wenyan removido. Ver addendum no proprio ADR-002."
+    },
+    {
+      "id": "ADR-003",
+      "title": "Contrato de paridade EN simplificado (required_keys + fallback)",
+      "status": "accepted",
+      "date": "2026-04-14",
+      "file": "decision_003_en_parity_contract.md",
+      "tags": ["i18n", "contract", "fallback"],
+      "supersededBy": null
+    },
+    {
+      "id": "ADR-004",
+      "title": "Mecanismo tecnico de resolucao de locale em JS/Python/Markdown",
+      "status": "accepted",
+      "date": "2026-04-14",
+      "file": "decision_004_locale_resolution_mechanism.md",
+      "tags": ["i18n", "hooks", "cli", "docs"],
+      "supersededBy": null
+    },
+    {
+      "id": "ADR-005",
+      "title": "Modo caveman-ptbr: portugues de caverna como modo adicional (analogo a wenyan)",
+      "status": "superseded",
+      "date": "2026-04-14",
+      "file": "decision_005_caveman_ptbr_mode.md",
+      "tags": ["i18n", "product", "mode"],
+      "supersededBy": "ADR-007"
+    },
+    {
+      "id": "ADR-006",
+      "title": "Organizacao de arquivos de locale, docs paralelos e sync CI",
+      "status": "accepted",
+      "date": "2026-04-14",
+      "file": "decision_006_file_organization_and_ci.md",
+      "tags": ["i18n", "ci", "structure"],
+      "supersededBy": null
+    },
+    {
+      "id": "ADR-007",
+      "title": "PT-BR nativo como output default; remocao de wenyan e sufixos ptbr-*",
+      "status": "accepted",
+      "date": "2026-04-14",
+      "file": "decision_007_ptbr_native_default_wenyan_removed.md",
+      "tags": ["product", "i18n", "mode", "upstream-divergence"],
+      "supersededBy": null
+    }
+  ]
+}

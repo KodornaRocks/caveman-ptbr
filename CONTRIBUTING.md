@@ -1,5 +1,7 @@
 # Contributing
 
+🇧🇷 [Versão em português](CONTRIBUTING.pt-br.md) · 📖 [README PT-BR](README.md)
+
 Improvements to the SKILL.md prompt are welcome — open a PR with before/after examples showing the change.
 
 ## How
@@ -14,6 +16,8 @@ Improvements to the SKILL.md prompt are welcome — open a PR with before/after 
 > **Note:** `caveman/SKILL.md`, `plugins/caveman/skills/caveman/SKILL.md`, `.cursor/skills/caveman/SKILL.md`, and `caveman.skill` are auto-synced by CI after merge. Do not edit them directly.
 
 Small focused change > big rewrite. Caveman like simple.
+
+> **Full Portuguese docs:** See [README.md](README.md) for complete guide in Portuguese.
 
 ## Ideas
 

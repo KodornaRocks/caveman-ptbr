@@ -1,5 +1,7 @@
 # Caveman Hooks
 
+🇧🇷 [Versão em português](README.pt-br.md) • 📖 [README principal](../README.md)
+
 These hooks are **bundled with the caveman plugin** and activate automatically when the plugin is installed. No manual setup required.
 
 If you installed caveman standalone (without the plugin), you can use `bash hooks/install.sh` to wire them into your settings.json manually.
@@ -17,12 +19,12 @@ If you installed caveman standalone (without the plugin), you can use `bash hook
 
 - Fires on every user prompt, checks for `/caveman` commands
 - Writes the active mode to the flag file when a caveman command is detected
-- Supports: `full`, `lite`, `ultra`, `wenyan`, `wenyan-lite`, `wenyan-ultra`, `commit`, `review`, `compress`
+- Supports: `full`, `lite`, `ultra`, `commit`, `review`, `compress`
 
 ### `caveman-statusline.sh` / `caveman-statusline.ps1` — Statusline badge script
 
 - Reads `~/.claude/.caveman-active` and outputs a colored badge
-- Shows `[CAVEMAN]`, `[CAVEMAN:ULTRA]`, `[CAVEMAN:WENYAN]`, etc.
+- Shows `[CAVEMAN]`, `[CAVEMAN:LITE]`, `[CAVEMAN:ULTRA]`, `[CAVEMAN:COMMIT]`, etc.
 
 ## Statusline Badge
 
@@ -75,7 +77,6 @@ fi
 Badge examples:
 - `/caveman` → `[CAVEMAN]`
 - `/caveman ultra` → `[CAVEMAN:ULTRA]`
-- `/caveman wenyan` → `[CAVEMAN:WENYAN]`
 - `/caveman-commit` → `[CAVEMAN:COMMIT]`
 - `/caveman-review` → `[CAVEMAN:REVIEW]`
 

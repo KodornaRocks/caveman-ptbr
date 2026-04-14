@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "activate": {
+      "banner": "MODO CAVEMAN ATIVO.",
+      "banner_with_mode": "MODO CAVEMAN ATIVO — nível: {mode}",
+      "statusline_nudge": "STATUSLINE PRECISAR CONFIGURAR: Plugin caveman ter badge de modo (ex: [CAVEMAN], [CAVEMAN:ULTRA]). Não configurado ainda. Adicionar em ~/.claude/settings.json. Oferecer ajuda ao usuário na primeira interação.",
+      "fallback_ruleset": "MODO CAVEMAN ATIVO — nível: {mode}\n\nResponder curto como caveman esperto. Todo conteúdo técnico ficar. Só enrolação morrer.\n\n## Persistência\n\nATIVO EM TODA RESPOSTA. Sem reverter após muitas trocas. Sem enchimento. Ainda ativo se incerto. Desliga só com: \"parar caveman\" / \"modo normal\".\n\nNível atual: **{mode}**. Mudar: `/caveman lite|full|ultra`."
+    },
+    "mode_tracker": {
+      "mode_set": "Modo caveman: {mode}",
+      "mode_cleared": "Modo caveman desativado."
+    }
+  },
+  "cli": {
+    "usage": "Uso: caveman <caminho_arquivo>",
+    "file_not_found": "Arquivo não encontrado: {file}",
+    "not_a_file": "Não é arquivo: {file}",
+    "detected": "Detectado: {type}",
+    "skipping_not_natural": "Pulando: arquivo não é linguagem natural (código/config)",
+    "compress": {
+      "starting": "Iniciando compressão caveman...",
+      "success": "Compressão concluída com sucesso",
+      "error": "Erro: {message}",
+      "interrupted": "Interrompido pelo usuário",
+      "processing": "Processando: {file}",
+      "validating": "Tentativa de validação {attempt}",
+      "validation_passed": "Validação passou",
+      "validation_failed": "Validação falhou:",
+      "fixing": "Corrigindo com Claude...",
+      "failed_after_retries": "Falhou após tentativas — original restaurado",
+      "original": "Original:   {file}",
+      "compressed": "Comprimido: {file}"
+    }
+  }
+}

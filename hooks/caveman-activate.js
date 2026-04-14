@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { getDefaultMode } = require('./caveman-config');
+const { t } = require('./caveman-i18n');
 
 const claudeDir = path.join(os.homedir(), '.claude');
 const flagPath = path.join(claudeDir, '.caveman-active');
@@ -45,12 +46,15 @@ try {
 const INDEPENDENT_MODES = new Set(['commit', 'review', 'compress']);
 
 if (INDEPENDENT_MODES.has(mode)) {
-  process.stdout.write('CAVEMAN MODE ACTIVE — level: ' + mode + '. Behavior defined by /caveman-' + mode + ' skill.');
+  try {
+    process.stdout.write(t('hooks.activate.banner_with_mode', { mode: mode }) + '. Behavior defined by /caveman-' + mode + ' skill.');
+  } catch (e) {
+    process.stdout.write('CAVEMAN MODE ACTIVE — level: ' + mode + '. Behavior defined by /caveman-' + mode + ' skill.');
+  }
   process.exit(0);
 }
 
-// Resolve the canonical label for wenyan alias
-const modeLabel = mode === 'wenyan' ? 'wenyan-full' : mode;
+const modeLabel = mode;
 
 // Read SKILL.md — the single source of truth for caveman behavior.
 // Plugin installs: __dirname = <plugin_root>/hooks/, SKILL.md at <plugin_root>/skills/caveman/SKILL.md
@@ -93,26 +97,34 @@ if (skillContent) {
     return acc;
   }, []);
 
-  output = 'CAVEMAN MODE ACTIVE — level: ' + modeLabel + '\n\n' + filtered.join('\n');
+  try {
+    output = t('hooks.activate.banner_with_mode', { mode: modeLabel }) + '\n\n' + filtered.join('\n');
+  } catch (e) {
+    output = 'CAVEMAN MODE ACTIVE — level: ' + modeLabel + '\n\n' + filtered.join('\n');
+  }
 } else {
   // Fallback when SKILL.md is not found (standalone hook install without skills dir).
   // This is the minimum viable ruleset — better than nothing.
-  output =
-    'CAVEMAN MODE ACTIVE — level: ' + modeLabel + '\n\n' +
-    'Respond terse like smart caveman. All technical substance stay. Only fluff die.\n\n' +
-    '## Persistence\n\n' +
-    'ACTIVE EVERY RESPONSE. No revert after many turns. No filler drift. Still active if unsure. Off only: "stop caveman" / "normal mode".\n\n' +
-    'Current level: **' + modeLabel + '**. Switch: `/caveman lite|full|ultra`.\n\n' +
-    '## Rules\n\n' +
-    'Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging. ' +
-    'Fragments OK. Short synonyms (big not extensive, fix not "implement a solution for"). Technical terms exact. Code blocks unchanged. Errors quoted exact.\n\n' +
-    'Pattern: `[thing] [action] [reason]. [next step].`\n\n' +
-    'Not: "Sure! I\'d be happy to help you with that. The issue you\'re experiencing is likely caused by..."\n' +
-    'Yes: "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:"\n\n' +
-    '## Auto-Clarity\n\n' +
-    'Drop caveman for: security warnings, irreversible action confirmations, multi-step sequences where fragment order risks misread, user asks to clarify or repeats question. Resume caveman after clear part done.\n\n' +
-    '## Boundaries\n\n' +
-    'Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level persist until changed or session end.';
+  try {
+    output = t('hooks.activate.fallback_ruleset', { mode: modeLabel });
+  } catch (e) {
+    output =
+      'MODO CAVEMAN ATIVO — nível: ' + modeLabel + '\n\n' +
+      'Responder curto como caveman esperto. Todo conteúdo técnico ficar. Só enrolação morrer.\n\n' +
+      '## Persistência\n\n' +
+      'ATIVO EM TODA RESPOSTA. Sem reverter após muitas trocas. Sem enchimento. Ainda ativo se incerto. Desliga só com: "parar caveman" / "modo normal".\n\n' +
+      'Nível atual: **' + modeLabel + '**. Mudar: `/caveman lite|full|ultra`.\n\n' +
+      '## Regras\n\n' +
+      'Remover: artigos (o/a/os/as/um/uma), enchimento (só/realmente/basicamente/na verdade/simplesmente), gentilezas (claro/certamente/com prazer/fico feliz em), hedging. ' +
+      'Fragmentos OK. Sinônimos curtos (grande não extenso, corrigir não "implementar uma solução para"). Termos técnicos exatos. Code blocks sem alteração. Erros citados exatos.\n\n' +
+      'Padrão: `[coisa] [ação] [motivo]. [próximo passo].`\n\n' +
+      'Não: "Claro! Fico feliz em ajudar com isso. O problema que você está enfrentando provavelmente é causado por..."\n' +
+      'Sim: "Bug no middleware de auth. Verificação de expiry de token usa `<` não `<=`. Corrigir:"\n\n' +
+      '## Auto-Clarity\n\n' +
+      'Largar caveman para: avisos de segurança, confirmações de ação irreversível, sequências multi-passo onde ordem de fragmento pode ser mal interpretada, usuário pede esclarecimento ou repete pergunta. Retomar caveman depois da parte clara.\n\n' +
+      '## Limites\n\n' +
+      'Código/commits/PRs: escrever normal. "parar caveman" ou "modo normal": reverter. Nível persiste até mudar ou sessão terminar.';
+  }
 }
 
 // 3. Detect missing statusline config — nudge Claude to help set it up
@@ -134,12 +146,16 @@ try {
       : `bash "${scriptPath}"`;
     const statusLineSnippet =
       '"statusLine": { "type": "command", "command": ' + JSON.stringify(command) + ' }';
-    output += "\n\n" +
-      "STATUSLINE SETUP NEEDED: The caveman plugin includes a statusline badge showing active mode " +
-      "(e.g. [CAVEMAN], [CAVEMAN:ULTRA]). It is not configured yet. " +
-      "To enable, add this to ~/.claude/settings.json: " +
-      statusLineSnippet + " " +
-      "Proactively offer to set this up for the user on first interaction.";
+    try {
+      output += "\n\n" + t('hooks.activate.statusline_nudge') + " " + statusLineSnippet;
+    } catch (e) {
+      output += "\n\n" +
+        "STATUSLINE SETUP NEEDED: The caveman plugin includes a statusline badge showing active mode " +
+        "(e.g. [CAVEMAN], [CAVEMAN:ULTRA]). It is not configured yet. " +
+        "To enable, add this to ~/.claude/settings.json: " +
+        statusLineSnippet + " " +
+        "Proactively offer to set this up for the user on first interaction.";
+    }
   }
 } catch (e) {
   // Silent fail — don't block session start over statusline detection

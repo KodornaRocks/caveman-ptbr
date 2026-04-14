@@ -3,7 +3,7 @@
 # Usage: powershell -ExecutionPolicy Bypass -File hooks\install.ps1
 #   or:  powershell -ExecutionPolicy Bypass -File hooks\install.ps1 -Force
 #   or (remote, no -Force support via pipe):
-#        irm https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks/install.ps1 | iex
+#        irm https://raw.githubusercontent.com/KodornaRocks/caveman-ptbr/main/hooks/install.ps1 | iex
 #   Note: irm ... | iex cannot pass -Force. For force reinstall, save the file and run with -File.
 param(
     [switch]$Force
@@ -22,9 +22,9 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 $ClaudeDir = Join-Path $env:USERPROFILE ".claude"
 $HooksDir = Join-Path $ClaudeDir "hooks"
 $Settings = Join-Path $ClaudeDir "settings.json"
-$RepoUrl = "https://raw.githubusercontent.com/JuliusBrussee/caveman/main/hooks"
+$RepoUrl = "https://raw.githubusercontent.com/KodornaRocks/caveman-ptbr/main/hooks"
 
-$HookFiles = @("caveman-config.js", "caveman-activate.js", "caveman-mode-tracker.js", "caveman-statusline.sh", "caveman-statusline.ps1")
+$HookFiles = @("caveman-config.js", "caveman-i18n.js", "caveman-activate.js", "caveman-mode-tracker.js", "caveman-statusline.sh", "caveman-statusline.ps1")
 
 # Resolve source — works from repo clone or remote
 $ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { $null }
@@ -181,6 +181,30 @@ console.log('  Hooks wired in settings.json');
 '@
 
 node -e $nodeScript
+
+# 3b. Copy locales/ to ~/.claude/locales/ (idempotent — only copies if source exists)
+$LocalesDest = Join-Path $ClaudeDir "locales"
+$RepoLocalesDir = if ($ScriptDir) { Join-Path (Split-Path $ScriptDir -Parent) "locales" } else { $null }
+if ($RepoLocalesDir -and (Test-Path $RepoLocalesDir)) {
+    if (-not (Test-Path $LocalesDest)) {
+        New-Item -ItemType Directory -Path $LocalesDest -Force | Out-Null
+    }
+    foreach ($localeFile in Get-ChildItem -Path $RepoLocalesDir -Filter "*.json") {
+        Copy-Item $localeFile.FullName (Join-Path $LocalesDest $localeFile.Name) -Force
+        Write-Host "  Installed locale: $(Join-Path $LocalesDest $localeFile.Name)"
+    }
+}
+
+# 3c. Copy caveman-compress/scripts/i18n.py (idempotent)
+$CompressScriptsDest = Join-Path $ClaudeDir "caveman-compress\scripts"
+$RepoI18nPy = if ($ScriptDir) { Join-Path (Split-Path $ScriptDir -Parent) "caveman-compress\scripts\i18n.py" } else { $null }
+if ($RepoI18nPy -and (Test-Path $RepoI18nPy)) {
+    if (-not (Test-Path $CompressScriptsDest)) {
+        New-Item -ItemType Directory -Path $CompressScriptsDest -Force | Out-Null
+    }
+    Copy-Item $RepoI18nPy (Join-Path $CompressScriptsDest "i18n.py") -Force
+    Write-Host "  Installed: $(Join-Path $CompressScriptsDest "i18n.py")"
+}
 
 Write-Host ""
 Write-Host "Done! Restart Claude Code to activate." -ForegroundColor Green

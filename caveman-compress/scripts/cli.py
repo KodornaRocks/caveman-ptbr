@@ -3,34 +3,46 @@
 Caveman Compress CLI
 
 Usage:
-    caveman <filepath>
+    caveman <filepath> [--lang=<code>]
 """
 
+import argparse
 import sys
 from pathlib import Path
 
 from .compress import compress_file
 from .detect import detect_file_type, should_compress
+from .i18n import get_lang, t
 
 
 def print_usage():
-    print("Usage: caveman <filepath>")
+    print(t('cli.usage'))
 
 
 def main():
-    if len(sys.argv) != 2:
-        print_usage()
-        sys.exit(1)
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('filepath', nargs='?', default=None)
+    parser.add_argument('--lang', default=None)
+    parser.add_argument('-h', '--help', action='store_true')
 
-    filepath = Path(sys.argv[1])
+    args, _ = parser.parse_known_args()
+
+    if args.help or args.filepath is None:
+        print_usage()
+        sys.exit(0 if args.help else 1)
+
+    # Resolve lang before any output so t() uses correct locale
+    _lang = get_lang(cli_arg=args.lang)
+
+    filepath = Path(args.filepath)
 
     # Check file exists
     if not filepath.exists():
-        print(f"❌ File not found: {filepath}")
+        print(f"❌ {t('cli.file_not_found', file=filepath)}")
         sys.exit(1)
 
     if not filepath.is_file():
-        print(f"❌ Not a file: {filepath}")
+        print(f"❌ {t('cli.not_a_file', file=filepath)}")
         sys.exit(1)
 
     filepath = filepath.resolve()
@@ -38,34 +50,34 @@ def main():
     # Detect file type
     file_type = detect_file_type(filepath)
 
-    print(f"Detected: {file_type}")
+    print(t('cli.detected', type=file_type))
 
     # Check if compressible
     if not should_compress(filepath):
-        print("Skipping: file is not natural language (code/config)")
+        print(t('cli.skipping_not_natural'))
         sys.exit(0)
 
-    print("Starting caveman compression...\n")
+    print(t('cli.compress.starting') + "\n")
 
     try:
         success = compress_file(filepath)
 
         if success:
-            print("\nCompression completed successfully")
             backup_path = filepath.with_name(filepath.stem + ".original.md")
-            print(f"Compressed: {filepath}")
-            print(f"Original:   {backup_path}")
+            print("\n" + t('cli.compress.success'))
+            print(t('cli.compress.compressed', file=filepath))
+            print(t('cli.compress.original', file=backup_path))
             sys.exit(0)
         else:
-            print("\n❌ Compression failed after retries")
+            print("\n❌ " + t('cli.compress.failed_after_retries'))
             sys.exit(2)
 
     except KeyboardInterrupt:
-        print("\nInterrupted by user")
+        print("\n" + t('cli.compress.interrupted'))
         sys.exit(130)
 
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print("\n❌ " + t('cli.compress.error', message=e))
         sys.exit(1)
 
 

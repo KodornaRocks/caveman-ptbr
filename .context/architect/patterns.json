@@ -1,0 +1,78 @@
+{
+  "projectName": "caveman-ptbr",
+  "lastUpdated": "2026-04-14T00:00:00.000Z",
+  "patterns": [
+    {
+      "id": "PAT-001",
+      "name": "Locale JSON Dictionary",
+      "category": "data",
+      "description": "Strings orientadas ao usuario em hooks JS e CLI Python sao armazenadas em arquivos JSON flat-ish por locale (locales/<lang>.json). Chaves em snake_case com namespaces por ponto (hooks.activate.banner, cli.compress.starting). Placeholders estilo {name}.",
+      "usage": "Usado por hooks/*.js (via require/readFileSync) e caveman-compress/scripts/*.py (via json.load). Ambos implementam funcao t(key, lang) com fallback.",
+      "examples": [
+        {
+          "file": "locales/pt-br.json",
+          "description": "Dicionario canonico PT-BR"
+        },
+        {
+          "file": "locales/en.json",
+          "description": "Dicionario canonico EN, paridade nas required_keys"
+        }
+      ],
+      "relatedDecisions": ["ADR-001", "ADR-004"],
+      "relatedPrinciples": ["P-001", "P-006"]
+    },
+    {
+      "id": "PAT-002",
+      "name": "Parallel Locale Files for Markdown",
+      "category": "structural",
+      "description": "Documentos Markdown longos (README, SKILL.md, sub-READMEs) sao arquivos paralelos com sufixo de locale no nome. Versao PT-BR e canonica para o fork; versao EN e mantida reduzida como upstream-compat.",
+      "usage": "README.md (EN, simplificado) + README.pt-br.md (canonico). skills/caveman/SKILL.md (EN upstream) + skills/caveman/SKILL.pt-br.md (canonico fork).",
+      "examples": [
+        {
+          "file": "README.pt-br.md",
+          "description": "Versao completa PT-BR com voz caveman brasileira"
+        },
+        {
+          "file": "README.md",
+          "description": "Versao EN simplificada apontando para README.pt-br.md"
+        }
+      ],
+      "relatedDecisions": ["ADR-006"],
+      "relatedPrinciples": ["P-005", "P-007"]
+    },
+    {
+      "id": "PAT-003",
+      "name": "Locale Resolver with Cascade Fallback",
+      "category": "behavioral",
+      "description": "Funcao pura que resolve (chave, lang) -> string. Ordem: locale requisitado -> pt-br (default do fork) -> literal hardcoded em codigo. Silent-fail se arquivo ausente ou JSON invalido.",
+      "usage": "Implementada em hooks/caveman-i18n.js e caveman-compress/scripts/i18n.py. Ambos exportam t(key, opts).",
+      "examples": [
+        {
+          "file": "hooks/caveman-i18n.js",
+          "description": "Resolver JS compartilhado entre caveman-activate.js e caveman-mode-tracker.js"
+        },
+        {
+          "file": "caveman-compress/scripts/i18n.py",
+          "description": "Resolver Python usado por cli.py e compress.py"
+        }
+      ],
+      "relatedDecisions": ["ADR-004"],
+      "relatedPrinciples": ["P-004", "P-006"]
+    },
+    {
+      "id": "PAT-004",
+      "name": "Additive Mode (caveman-ptbr)",
+      "category": "behavioral",
+      "description": "Novo comportamento do produto e introduzido como MODO ADICIONAL, nao como substituto. Modos existentes (full/lite/ultra/wenyan-*) preservados; modo caveman-ptbr adicionado seguindo template do wenyan.",
+      "usage": "Comando /caveman ptbr ou /caveman caveman-ptbr ativa modo. hooks/caveman-mode-tracker.js reconhece chave. SKILL.md documenta regras de portugues de caverna.",
+      "examples": [
+        {
+          "file": "skills/caveman/SKILL.md",
+          "description": "Nova secao caveman-ptbr analoga a wenyan-*, com regras de portugues de caverna (verbo infinitivo, zero flexao, telegraf-style PT)"
+        }
+      ],
+      "relatedDecisions": ["ADR-005"],
+      "relatedPrinciples": ["P-002"]
+    }
+  ]
+}

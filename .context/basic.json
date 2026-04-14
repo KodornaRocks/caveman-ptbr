@@ -1,0 +1,54 @@
+{
+  "projectName": "caveman-ptbr",
+  "description": "Fork do projeto 'caveman' (JuliusBrussee/caveman) — plugin/skill para agentes de IA (Claude Code, Codex, Gemini CLI, Cursor, Windsurf, Cline, Copilot e 40+ outros) que faz o agente responder em 'caveman-speak', reduzindo ~65-75% dos output tokens mantendo precisão técnica total. Inclui também 'caveman-compress', ferramenta que comprime arquivos .md de memória (~46% input tokens). Fork criado para adaptação i18n PT-BR / EN simplificado.",
+  "primaryLanguages": ["markdown", "javascript", "python", "bash"],
+  "frameworks": ["Node.js (hooks)", "Python 3.10+ (caveman-compress CLI)", "anthropic SDK (opcional)", "uv (runner de benchmarks/evals)"],
+  "entryPoints": [
+    { "file": "skills/caveman/SKILL.md", "purpose": "FONTE DE VERDADE única do comportamento caveman — único arquivo a editar para mudanças de comportamento. CI sincroniza para todas as cópias." },
+    { "file": "rules/caveman-activate.md", "purpose": "FONTE DE VERDADE da regra de auto-ativação — CI sincroniza para Cline, Copilot, Cursor (.mdc), Windsurf." },
+    { "file": "hooks/caveman-activate.js", "purpose": "SessionStart hook (Node.js) — emite ruleset caveman como contexto de sistema, escreve flag ~/.claude/.caveman-active." },
+    { "file": "hooks/caveman-mode-tracker.js", "purpose": "UserPromptSubmit hook — rastreia /caveman commands e atualiza flag de modo." },
+    { "file": "hooks/caveman-config.js", "purpose": "Resolvedor de configuração compartilhado — prioridade: CAVEMAN_DEFAULT_MODE env > ~/.config/caveman/config.json > 'full'." },
+    { "file": "caveman-compress/scripts/__main__.py", "purpose": "Entry point do CLI caveman-compress (python3 -m scripts <filepath>)." },
+    { "file": "evals/llm_run.py", "purpose": "Gerador de snapshots de evals — chama claude CLI em 3 condições (baseline/terse/terse+skill)." },
+    { "file": "benchmarks/run.py", "purpose": "Benchmark real via Anthropic API — requer ANTHROPIC_API_KEY." }
+  ],
+  "lastAnalyzed": "2026-04-14T00:00:00.000Z",
+  "contextFiles": [
+    {
+      "filename": "specific_i18n_analysis.json",
+      "topic": "Análise i18n para fork PT-BR",
+      "description": "Mapa completo de strings hardcoded, docs, fixtures, testes, CI/CD, dependências e áreas sensíveis para embasar decisão arquitetural de i18n dual-language PT-BR/EN.",
+      "lastUpdated": "2026-04-14T00:00:00.000Z"
+    },
+    {
+      "filename": "architect/decisions.json",
+      "topic": "ADRs do fork (i18n dual-language)",
+      "description": "Indice das 6 ADRs iniciais cobrindo estrategia dual-language, escopo de traducao, contrato de paridade EN, mecanismo tecnico, modo caveman-ptbr e organizacao de arquivos/CI.",
+      "lastUpdated": "2026-04-14T00:00:00.000Z"
+    }
+  ],
+  "agentContexts": {
+    "architect": true,
+    "projectManager": false
+  },
+  "keyInsights": [
+    "Projeto é 100% content-only (Markdown + JS hooks + Python scripts) — ZERO framework web, zero banco de dados, zero API server.",
+    "Single source of truth: skills/caveman/SKILL.md. CI (.github/workflows/sync-skill.yml) sincroniza automaticamente para 9 cópias distribuídas quando há push em main.",
+    "O conteúdo caveman-speak do SKILL.md é em inglês e é DELIBERADAMENTE broken-English — essa é a feature, não um bug.",
+    "Não existe nenhuma lib de i18n, locale ou internacionalização no projeto atualmente.",
+    "Os hooks JS rodam em Node.js puro (módulos CommonJS, sem dependências externas — apenas fs, path, os nativos).",
+    "caveman-compress usa anthropic SDK (opcional) com fallback para claude CLI — única dependência de runtime Python.",
+    "Testes em Python (unittest stdlib) e verificação de repo em verify_repo.py — sem pytest, sem coverage formal.",
+    "CI/CD: único workflow GitHub Actions (sync-skill.yml) — não faz deploy, apenas sincroniza arquivos e faz commit de volta.",
+    "Evals usam prompts exclusivamente em inglês (evals/prompts/en.txt) — 10 perguntas técnicas de desenvolvimento.",
+    "Benchmarks usam prompts exclusivamente em inglês (benchmarks/prompts.json) — 10 cenários técnicos.",
+    "Todo conteúdo orientado ao usuário está em inglês: README, CONTRIBUTING, mensagens do CLI, output dos hooks, badges de statusline, strings nos scripts Python.",
+    "O projeto NÃO tem package.json — os hooks JS são scripts standalone sem npm install.",
+    "ADR-001: estratégia i18n escolhida = locale JSON files (stdlib) + runtime flag CAVEMAN_LANG + arquivos Markdown paralelos .pt-br.md. Zero libs de i18n.",
+    "ADR-002: PT-BR é idioma de INTERFACE (hooks, CLI, docs); output caveman-speak é PRESERVADO em inglês quebrado pois é a feature do produto.",
+    "ADR-005: modo caveman-ptbr adicionado como análogo ao wenyan (padrão multi-idioma existente); não substitui modos full/lite/ultra.",
+    "ADR-006: CI sync-skill.yml estendido (aditivo) para sincronizar arquivos .pt-br.md paralelos e locales/ sem quebrar sync EN upstream-compat."
+  ],
+  "explorationNotes": "Exploração inicial completa para fins de decisão arquitetural i18n. Ver specific_i18n_analysis.json para mapa detalhado de todas as áreas afetadas."
+}
